@@ -17,6 +17,7 @@ contract CompreWallet is Initializable {
   struct Call {
     address target;
     bytes callData;
+    bool shouldRevert; // true if whole tx should revert on failure, false otherwise
   }
 
   /**
@@ -61,7 +62,9 @@ contract CompreWallet is Initializable {
     returnData = new bytes[](calls.length);
     for (uint256 i = 0; i < calls.length; i++) {
       (bool success, bytes memory ret) = calls[i].target.call(calls[i].callData);
-      require(success, "CompreWallet: Call failed");
+      if (calls[i].shouldRevert) {
+        require(success, "CompreWallet: Call failed");
+      }
       returnData[i] = ret;
     }
   }

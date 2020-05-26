@@ -25,7 +25,7 @@ const dai = new ethers.Contract(addresses.dai, abi.dai, ethersProvider.getSigner
 const CompreWallet = contract.fromArtifact('CompreWallet');
 
 describe('CompreWallet', () => {
-  const [deployer, user, user2] = accounts;
+  const [deployer, user, user2, user3] = accounts;
   let compreWallet;
 
   beforeEach(async () => {
@@ -83,11 +83,11 @@ describe('CompreWallet', () => {
     const transferAmount = parseEther('10');
     const calls = [
       // Transfer Dai to someone
-      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user2, transferAmount])],
+      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user2, transferAmount]), true],
       // Approve PoolTogether contract to spend our Dai
-      [addresses.dai, dai.interface.encodeFunctionData('approve', [addresses.pool, MAX_UINT256])],
+      [addresses.dai, dai.interface.encodeFunctionData('approve', [addresses.pool, MAX_UINT256]), true],
       // Approve cDAI contract to spend our Dai
-      [addresses.dai, dai.interface.encodeFunctionData('approve', [addresses.cdai, MAX_UINT256])],
+      [addresses.dai, dai.interface.encodeFunctionData('approve', [addresses.cdai, MAX_UINT256]), true],
     ];
     const tx = await compreWalletE.aggregate(calls);
     const receipt = await tx.wait();
@@ -98,7 +98,7 @@ describe('CompreWallet', () => {
     expect((await dai.allowance(walletAddress, addresses.cdai)).toString()).to.equal(MAX_UINT256);
   });
 
-  it('throws on a failed call', async () => {
+  it('reverts on a failed call', async () => {
     // Send Dai to the user's wallet
     const walletAddress = compreWallet.address;
     const depositAmount = parseEther('100');
@@ -115,8 +115,38 @@ describe('CompreWallet', () => {
     // Send call that will fail
     const transferAmount = parseEther('1000');
     const calls = [
-      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user2, transferAmount])],
+      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user2, transferAmount]), true],
     ];
     await expectRevert(compreWalletE.aggregate(calls), 'CompreWallet: Call failed');
+  });
+
+  it('lets user prevent failed calls from reverting', async () => {
+    // Send Dai to the user's wallet
+    const walletAddress = compreWallet.address;
+    const depositAmount = parseEther('100');
+    await dai.transfer(walletAddress, depositAmount);
+    expect((await dai.balanceOf(walletAddress)).toString()).to.equal(depositAmount.toString());
+
+    // Generate ethers.js instance of the contract (since this is what we use on the frontend)
+    const compreWalletE = new ethers.Contract(
+      walletAddress,
+      compreWallet.abi,
+      ethersProvider.getSigner(user),
+    );
+
+    // Send call that will fail
+    const transferAmount = parseEther('1000');
+    const transferAmount2 = parseEther('10');
+    const calls = [
+      // This will revert but be ignored
+      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user3, transferAmount]), false],
+      // This will succeed
+      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user3, transferAmount2]), true],
+    ];
+    const tx = await compreWalletE.aggregate(calls);
+    const receipt = await tx.wait();
+
+    // First transfer of 1000 Dai should fail but second transfer of 10 Dai should succeed
+    expect((await dai.balanceOf(user3)).toString()).to.equal(transferAmount2.toString());
   });
 });
