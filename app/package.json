@@ -13,10 +13,9 @@
     "dev": "npx quasar dev"
   },
   "dependencies": {
+    "@biconomy/mexa": "^1.5.11",
     "@quasar/extras": "^1.0.0",
-    "@walletconnect/web3-provider": "^1.0.0-beta.47",
-    "quasar": "^1.0.0",
-    "web3modal": "^1.6.3"
+    "quasar": "^1.0.0"
   },
   "devDependencies": {
     "@quasar/app": "^1.0.0",

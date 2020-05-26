@@ -6,5 +6,6 @@ export default function () {
     ethersProvider: undefined,
     userAddress: undefined,
     walletAddress: undefined,
+    biconomy: undefined,
   };
 }

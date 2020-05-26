@@ -5,4 +5,5 @@ export function setWallet(state, wallet) {
   state.ethersProvider = wallet.ethersProvider;
   state.userAddress = wallet.userAddress;
   state.walletAddress = wallet.walletAddress;
+  state.biconomy = wallet.biconomy;
 }

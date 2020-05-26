@@ -3,9 +3,10 @@ pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "./EIP712MetaTransaction.sol";
 
 
-contract CompreWallet is Initializable {
+contract CompreWallet is Initializable, EIP712MetaTransaction("CompreWallet", "1") {
   /**
    * @notice The user will be the contract owner
    */
@@ -29,7 +30,7 @@ contract CompreWallet is Initializable {
    * @notice Only let user call a function, either directly or via the GSN-enabled factory
    */
   modifier onlyOwner() {
-    require(owner == msg.sender, "CompreWallet: Caller not authorized");
+    require(owner == msgSender(), "CompreWallet: Caller not authorized");
     _;
   }
 
@@ -54,8 +55,9 @@ contract CompreWallet is Initializable {
    * @notice Batches a sequence of calls into one transaction
    * @dev Based on the Multicall contract: https://github.com/makerdao/multicall
    */
-  function aggregate(Call[] memory calls)
-    public
+  function aggregate(Call[] calldata calls)
+    external
+    onlyOwner
     returns (uint256 blockNumber, bytes[] memory returnData)
   {
     blockNumber = block.number;

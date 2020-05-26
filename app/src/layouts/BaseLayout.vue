@@ -37,6 +37,12 @@
                 />
                 View Account
               </div>
+              <div
+                v-if="!isValidChain"
+                class="negative text-bold q-mr-md"
+              >
+                You must be on the Kovan network to use this app
+              </div>
             </div>
             <div v-else>
               <!--  -->
@@ -108,6 +114,13 @@ export default {
     ...mapState({
       userAddress: (state) => state.main.userAddress,
       walletAddress: (state) => state.main.walletAddress,
+      isValidChain: (state) => {
+        const { provider } = state.main;
+        if (!provider) return true; // assume valid if not connected
+        const { chainId } = provider;
+        if (chainId === '0x2a' || chainId === '42' || chainId === 42) return true;
+        return false;
+      },
     }),
   },
 };

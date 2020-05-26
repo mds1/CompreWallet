@@ -98,6 +98,10 @@ describe('CompreWallet', () => {
     expect((await dai.allowance(walletAddress, addresses.cdai)).toString()).to.equal(MAX_UINT256);
   });
 
+  it('only lets the owner send batched calls', async () => {
+    //
+  });
+
   it('reverts on a failed call', async () => {
     // Send Dai to the user's wallet
     const walletAddress = compreWallet.address;

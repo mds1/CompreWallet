@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 
+import "./EIP712MetaTransaction.sol";
 import "./CompreWallet.sol";
 
 
-contract CompreWalletFactory {
+contract CompreWalletFactory is EIP712MetaTransaction("CompreWalletFactory", "1") {
   /**
    * @notice Store list of all users
    */
@@ -27,7 +28,7 @@ contract CompreWalletFactory {
    */
   function createContract(address _target) external {
     // Contract user is the user who sent the meta-transaction
-    address _user = msg.sender;
+    address _user = msgSender();
 
     // Define function call to initialize the new ProvideLiquidity contract
     bytes memory _payload = abi.encodeWithSignature("initializeWallet(address)", _user);

@@ -16,8 +16,6 @@
 
 <script>
 import { mapState } from 'vuex';
-import Web3Modal from 'web3modal';
-import WalletConnectProvider from '@walletconnect/web3-provider';
 import helpers from 'src/mixins/helpers';
 
 export default {
@@ -56,22 +54,8 @@ export default {
     async connectWallet() {
       try {
         this.isLoading = true;
-
-        const providerOptions = {
-          walletconnect: {
-            package: WalletConnectProvider, // required
-            options: {
-              infuraId: process.env.INFURA_ID, // required
-            },
-          },
-        };
-        const web3Modal = new Web3Modal({
-          providerOptions,
-          theme: this.$q.dark.isActive ? 'dark' : 'light',
-        });
-        const provider = await web3Modal.connect();
-
-        await this.$store.dispatch('main/setEthereumData', provider);
+        await window.ethereum.enable();
+        await this.$store.dispatch('main/setEthereumData', window.ethereum);
         this.$router.push({ name: 'dashboard' });
       } catch (err) {
         this.showError(err, 'Unable to connect wallet. Please try again.');

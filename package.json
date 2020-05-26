@@ -4,8 +4,8 @@
   "description": "The smart contract wallet than can do it all",
   "main": "index.js",
   "scripts": {
-    "compile": "npx oz compile --solc-version 0.6.8",
-    "test": "npx oz compile --solc-version 0.6.8 && mocha --exit --timeout 0 test/*.test.js"
+    "compile": "npx oz compile --solc-version 0.6.8 --evm-version istanbul",
+    "test": "npx oz compile --solc-version 0.6.8 --evm-version istanbul && mocha --exit --timeout 0 test/*.test.js"
   },
   "repository": {
     "type": "git",
