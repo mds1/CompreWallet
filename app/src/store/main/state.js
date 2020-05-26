@@ -8,6 +8,7 @@ export default function () {
     walletAddress: undefined,
     biconomy: undefined,
     web3: undefined,
+    balances: {},
     contracts: {
       addresses: {},
       factory: undefined,

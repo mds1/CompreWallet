@@ -1,6 +1,9 @@
 import { ethers } from 'ethers';
 import Web3 from 'web3';
 import Biconomy from '@biconomy/mexa';
+import { getEtherBalances, getTokensBalance } from '@mycrypto/eth-scan';
+
+const { formatEther, formatUnits } = ethers.utils;
 
 const addresses = require('../../../../addresses.json');
 addresses.compreWallet = require('../../../../.openzeppelin/kovan.json').proxies['comprewallet/CompreWallet'][0].address;
@@ -29,6 +32,23 @@ export async function setEthereumData({ commit }, provider) {
   );
   const walletAddress = await factory.getContract(userAddress);
 
+  // If they do, check token balances
+  let balances;
+  if (walletAddress !== ethers.constants.AddressZero) {
+    const balancesByAddress = await getTokensBalance(ethersProvider, userAddress, [
+      addresses.dai,
+      addresses.cdai,
+      addresses.pool,
+    ]);
+    const ethBalance = await getEtherBalances(ethersProvider, [userAddress]);
+    balances = {
+      ETH: formatEther(ethBalance[userAddress]),
+      DAI: formatEther(balancesByAddress[addresses.dai]),
+      cDAI: formatUnits(balancesByAddress[addresses.cdai], 8),
+      plDAI: formatEther(balancesByAddress[addresses.pool]),
+    };
+  }
+
   const contracts = {
     addresses,
     factory, // this is an ethers, read-only version, the below is  web3 meta-tx version
@@ -36,6 +56,14 @@ export async function setEthereumData({ commit }, provider) {
   };
 
   commit('setWallet', {
-    signer, provider, ethersProvider, userAddress, walletAddress, biconomy, contracts, web3,
+    signer,
+    provider,
+    ethersProvider,
+    userAddress,
+    walletAddress,
+    biconomy,
+    contracts,
+    web3,
+    balances,
   });
 }
