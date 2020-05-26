@@ -121,29 +121,22 @@ export default {
     // https://github.com/bcnmy/metatx-standard/blob/master/example/react-ui/src/App.js
 
     /**
-     * @notice Deploy user's wallet on first visit
+     * @notice Get message to sign
      */
-    async deployWallet() {
-      this.isLoading = true;
-      const contract = this.factoryContract;
-      const logicAddress = this.addresses.compreWallet;
-      const functionData = contract.methods.createContract(logicAddress).encodeABI();
-      const nonce = parseInt((await this.factory.getNonce(this.userAddress)).toString(), 10);
-
-      const message = {
+    async getMessage(ethersContract, functionData) {
+      const nonce = parseInt((await ethersContract.getNonce(this.userAddress)).toString(), 10);
+      return {
         nonce,
         from: this.userAddress,
         functionSignature: functionData,
       };
+    },
 
-      const domainData = {
-        name: 'CompreWalletFactory',
-        chainId: 42, // Kovan
-        version: '1',
-        verifyingContract: this.addresses.compreWalletFactory,
-      };
-
-      const dataToSign = JSON.stringify({
+    /**
+     * @notice Returns the blob of data to sign
+     */
+    getDataToSign(domainData, message) {
+      return JSON.stringify({
         types: {
           EIP712Domain: this.domainType,
           MetaTransaction: this.metaTransactionType,
@@ -152,7 +145,13 @@ export default {
         primaryType: 'MetaTransaction',
         message,
       });
+    },
 
+    /**
+     * @notice Get EIP712 signature from user and send meta-transaction
+     */
+    async sendMetaTransaction(contract, dataToSign) {
+      const functionData = JSON.parse(dataToSign).message.functionSignature;
       this.web3.currentProvider.send(
         {
           jsonrpc: '2.0',
@@ -170,6 +169,28 @@ export default {
           }
         },
       );
+    },
+
+
+    /**
+     * @notice Deploy user's wallet on first visit
+     */
+    async deployWallet() {
+      this.isLoading = true;
+      const contract = this.factoryContract;
+      const logicAddress = this.addresses.compreWallet;
+      const functionData = contract.methods.createContract(logicAddress).encodeABI();
+      const message = await this.getMessage(this.factory, functionData);
+
+      const domainData = {
+        name: 'CompreWalletFactory',
+        chainId: 42, // Kovan
+        version: '1',
+        verifyingContract: this.addresses.compreWalletFactory,
+      };
+      const dataToSign = this.getDataToSign(domainData, message);
+
+      await this.sendMetaTransaction(contract, dataToSign);
     },
 
 
