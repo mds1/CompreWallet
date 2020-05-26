@@ -33,8 +33,25 @@
       />
     </div>
     <div v-else>
-      <h5 class="text-center">Balances</h5>
-      <h5 class="text-center">Transactions</h5>
+      <h5 class="secondary text-bold text-center">Balances</h5>
+      <div class="row justify-evenly">
+        <div
+          v-for="(token, index) in balances"
+          :key="token.index"
+        >
+          {{formatNumber(token)}} {{index}}
+        </div>
+      </div>
+
+      <div class="q-mt-xl q-pt-lg">
+        <h5 class="secondary text-bold text-center">Transactions</h5>
+        <div class="row justify-evenly">
+          <base-button
+            label="Add transaction"
+            @click="addTransaction"
+          />
+        </div>
+      </div>
 
     </div>
 
@@ -96,6 +113,7 @@ export default {
   computed: {
     ...mapState({
       web3: (state) => state.main.web3,
+      balances: (state) => state.main.balances,
       addresses: (state) => state.main.contracts.addresses,
       factory: (state) => state.main.contracts.factory, // ethers
       factoryContract: (state) => state.main.contracts.factoryContract, // web3 meta-tx
@@ -239,6 +257,18 @@ export default {
       v = this.web3.utils.hexToNumber(v);
       if (![27, 28].includes(v)) v += 27;
       return { r, s, v };
+    },
+
+    formatNumber(number, decimals = 4) {
+      if (!number) return '-';
+      return Number(number).toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: decimals,
+      });
+    },
+
+    addTransaction() {
+      console.log('add');
     },
   },
 };
