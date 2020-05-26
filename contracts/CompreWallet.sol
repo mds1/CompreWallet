@@ -13,11 +13,12 @@ contract CompreWallet is Initializable, EIP712MetaTransaction("CompreWallet", "1
   address public owner;
 
   /**
-   * @notice Each batched call requires a target address and calldata
+   * @notice Required parameters for each call
    */
   struct Call {
     address target;
     bytes callData;
+    uint256 value;
     bool shouldRevert; // true if whole tx should revert on failure, false otherwise
   }
 
@@ -63,9 +64,9 @@ contract CompreWallet is Initializable, EIP712MetaTransaction("CompreWallet", "1
     blockNumber = block.number;
     returnData = new bytes[](calls.length);
     for (uint256 i = 0; i < calls.length; i++) {
-      (bool success, bytes memory ret) = calls[i].target.call(calls[i].callData);
+      (bool ok, bytes memory ret) = calls[i].target.call{value: calls[i].value}(calls[i].callData);
       if (calls[i].shouldRevert) {
-        require(success, "CompreWallet: Call failed");
+        require(ok, "CompreWallet: Call failed");
       }
       returnData[i] = ret;
     }

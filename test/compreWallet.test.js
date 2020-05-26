@@ -83,11 +83,11 @@ describe('CompreWallet', () => {
     const transferAmount = parseEther('10');
     const calls = [
       // Transfer Dai to someone
-      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user2, transferAmount]), true],
+      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user2, transferAmount]), '0', true],
       // Approve PoolTogether contract to spend our Dai
-      [addresses.dai, dai.interface.encodeFunctionData('approve', [addresses.pool, MAX_UINT256]), true],
+      [addresses.dai, dai.interface.encodeFunctionData('approve', [addresses.pool, MAX_UINT256]), '0', true],
       // Approve cDAI contract to spend our Dai
-      [addresses.dai, dai.interface.encodeFunctionData('approve', [addresses.cdai, MAX_UINT256]), true],
+      [addresses.dai, dai.interface.encodeFunctionData('approve', [addresses.cdai, MAX_UINT256]), '0', true],
     ];
     const tx = await compreWalletE.aggregate(calls);
     const receipt = await tx.wait();
@@ -119,7 +119,7 @@ describe('CompreWallet', () => {
     // Send call that will fail
     const transferAmount = parseEther('1000');
     const calls = [
-      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user2, transferAmount]), true],
+      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user2, transferAmount]), '0', true],
     ];
     await expectRevert(compreWalletE.aggregate(calls), 'CompreWallet: Call failed');
   });
@@ -143,9 +143,9 @@ describe('CompreWallet', () => {
     const transferAmount2 = parseEther('10');
     const calls = [
       // This will revert but be ignored
-      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user3, transferAmount]), false],
+      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user3, transferAmount]), '0', false],
       // This will succeed
-      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user3, transferAmount2]), true],
+      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user3, transferAmount2]), '0', true],
     ];
     const tx = await compreWalletE.aggregate(calls);
     const receipt = await tx.wait();
