@@ -10,6 +10,8 @@ export default function () {
     web3: undefined,
     contracts: {
       addresses: {},
+      factory: undefined,
+      factoryContract: undefined,
     },
   };
 }

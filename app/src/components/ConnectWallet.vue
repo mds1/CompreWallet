@@ -4,7 +4,6 @@
     <div>
       <base-button
         id="button--connect-wallet"
-        color="primary"
         :full-width="fullWidth"
         :label="label"
         :loading="isLoading"

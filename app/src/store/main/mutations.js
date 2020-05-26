@@ -9,5 +9,6 @@ export function setWallet(state, wallet) {
   state.web3 = wallet.web3;
 
   state.contracts.factory = wallet.contracts.factory;
+  state.contracts.factoryContract = wallet.contracts.factoryContract;
   state.contracts.addresses = wallet.contracts.addresses;
 }
