@@ -7,5 +7,9 @@ export default function () {
     userAddress: undefined,
     walletAddress: undefined,
     biconomy: undefined,
+    web3: undefined,
+    contracts: {
+      addresses: {},
+    },
   };
 }

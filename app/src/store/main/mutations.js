@@ -6,4 +6,8 @@ export function setWallet(state, wallet) {
   state.userAddress = wallet.userAddress;
   state.walletAddress = wallet.walletAddress;
   state.biconomy = wallet.biconomy;
+  state.web3 = wallet.web3;
+
+  state.contracts.factory = wallet.contracts.factory;
+  state.contracts.addresses = wallet.contracts.addresses;
 }

@@ -15,7 +15,8 @@
   "dependencies": {
     "@biconomy/mexa": "^1.5.11",
     "@quasar/extras": "^1.0.0",
-    "quasar": "^1.0.0"
+    "quasar": "^1.0.0",
+    "web3": "^1.2.8"
   },
   "devDependencies": {
     "@quasar/app": "^1.0.0",
