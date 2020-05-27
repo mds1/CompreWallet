@@ -304,8 +304,6 @@ export default {
   },
 
   methods: {
-    // See sample code at the URL below
-    // https://github.com/bcnmy/metatx-standard/blob/master/example/react-ui/src/App.js
 
     /**
      * @notice Get message to sign
