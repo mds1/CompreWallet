@@ -42,7 +42,7 @@ export async function setEthereumData({ commit }, provider) {
   let balances;
   if (walletAddress !== ethers.constants.AddressZero) {
     // Get token balances
-    const balancesByAddress = await getTokensBalance(ethersProvider, userAddress, [
+    const balancesByAddress = await getTokensBalance(ethersProvider, walletAddress, [
       addresses.dai,
       addresses.cdai,
     ]);
@@ -54,7 +54,7 @@ export async function setEthereumData({ commit }, provider) {
     // PoolTogether has multiple token states, so we check all of them here
     const poolAbi = ['function totalBalanceOf(address _addr) external view returns (uint256) '];
     const pool = new ethers.Contract(addresses.pool, poolAbi, ethersProvider);
-    balances.plDAI = formatEther(await pool.totalBalanceOf(userAddress));
+    balances.plDAI = formatEther(await pool.totalBalanceOf(walletAddress));
 
     // Contract instances
     contracts.wallet = new ethers.Contract(walletAddress, abi.compreWallet, ethersProvider);

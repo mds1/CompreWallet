@@ -279,6 +279,7 @@ export default {
       web3: (state) => state.main.web3,
       provider: (state) => state.main.provider,
       ethersProvider: (state) => state.main.ethersProvider,
+      signer: (state) => state.main.signer,
       balances: (state) => state.main.balances,
       addresses: (state) => state.main.contracts.addresses,
       factory: (state) => state.main.contracts.factory, // ethers
@@ -337,6 +338,7 @@ export default {
      */
     async sendMetaTransaction(contract, dataToSign) {
       const functionData = JSON.parse(dataToSign).message.functionSignature;
+      console.log(4);
       this.web3.currentProvider.send(
         {
           jsonrpc: '2.0',
@@ -346,10 +348,13 @@ export default {
         },
         async (error, response) => {
           if (error || (response && response.error)) {
+            console.log(4.1);
             this.showError(error);
             this.isLoading = false;
           } else if (response && response.result) {
+            console.log(4.2);
             const { r, s, v } = this.getSignatureParameters(response.result);
+            console.log(4.3);
             await this.sendTransaction(contract, this.userAddress, functionData, r, s, v);
           }
         },
@@ -381,20 +386,24 @@ export default {
 
     async sendTransaction(contract, userAddress, functionData, r, s, v) {
       const { web3 } = this;
+      console.log(5);
       if (web3 && contract) {
+        console.log(6);
         try {
-          const gasLimit = await contract.methods
-            .executeMetaTransaction(userAddress, functionData, r, s, v)
-            .estimateGas({ from: userAddress });
+          // const gasLimit = await contract.methods
+          //   .executeMetaTransaction(userAddress, functionData, r, s, v)
+          //   .estimateGas({ from: userAddress });
 
+          console.log(7);
           const gasPrice = await web3.eth.getGasPrice();
 
+          console.log(8);
           const tx = contract.methods
             .executeMetaTransaction(userAddress, functionData, r, s, v)
             .send({
               from: userAddress,
               gasPrice: web3.utils.toHex(gasPrice),
-              gasLimit: web3.utils.toHex(gasLimit),
+              gasLimit: web3.utils.toHex('3000000'),
             });
           tx.on('transactionHash', (hash) => {
             this.txHash = hash;
@@ -444,10 +453,12 @@ export default {
 
     /**
      * @notice Sends batched transactions
+     * @dev TODO this function currently does not work!!!
      */
     async sendAllTransactions() {
       this.isLoading = true;
       const calls = [];
+      console.log(0);
       for (let i = 0; i < this.selectedContracts.length; i += 1) {
         // Get address and ABI of selected contract
         const { address, abi } = this.selectedContracts[i];
@@ -457,52 +468,44 @@ export default {
         const shouldRevert = this.selectedReverts[i].value;
 
         // Format function input data
-        let parsedInputs;
-        if (this.selectedContracts[i].value !== 'uniswap') {
-          const inputs = this.selectedInputs[i].split(',');
-          parsedInputs = inputs.map((input) => {
-            const trimmed = input.trim();
-            // If hex string, leave value alone
-            if (trimmed.startsWith('0x')) return trimmed;
-            // If number, scale number
-            if (!Number.isNaN(Number(trimmed))) return ethers.utils.parseEther(trimmed).toString();
-            return trimmed;
-          });
-        } else {
-          // This was for Uniswap ETH > DAI, but it seems Biconomy does not support value
-          // transfer, so this section can be ignored
-          // Amount, [path], to, deadline
-          const inputs = this.selectedInputs[i].split('[');
-          const intermediateInputs = inputs.map((input, index) => {
-            if (index === 0) {
-              // The first input is a number, so remove the comma and convert to wei
-              return ethers.utils.parseEther(input.split(',')[0]).toString();
-            }
-            // Next input is the path, so we split this at the closing bracket
-            const otherInputs = input.split(']');
-            const path = [
-              otherInputs[0].split(',')[0].trim(),
-              otherInputs[0].split(',')[1].trim(),
-            ];
-            const lastPortion = otherInputs[1].split(',');
-            return [path, lastPortion[1].trim(), lastPortion[2].trim()];
-          });
-          parsedInputs = [intermediateInputs[0], ...intermediateInputs[1]];
-        }
+        const inputs = this.selectedInputs[i].split(',');
+        const parsedInputs = inputs.map((input) => {
+          const trimmed = input.trim();
+          // If hex string, leave value alone
+          if (trimmed.startsWith('0x')) return trimmed;
+          // If number, scale number
+          if (!Number.isNaN(Number(trimmed))) return ethers.utils.parseEther(trimmed).toString();
+          return trimmed;
+        });
 
+        console.log(1);
         // Generate encoded data
-        const contract = new ethers.Contract(address, abi, this.ethersProvider);
+        const contract = new this.web3.eth.Contract(abi, address);
         const method = this.selectedMethods[i].name;
-        const encodedData = contract.interface.encodeFunctionData(method, [...parsedInputs]);
+        console.log(parsedInputs);
+        const encodedData = contract.methods[method](...parsedInputs).encodeABI();
 
         // Add call to list of calls
-        calls.push([address, encodedData, value.toString(), shouldRevert]);
+        calls.push({
+          target: address, callData: encodedData, value: value.toString(), shouldRevert,
+        });
       }
 
+      /* eslint-disable */
       // Send transactions
+      console.log(2);
+      const walletAbi = require('../../../build/contracts/CompreWallet.json').abi;
+      console.log(calls);
+      const tx = await this.walletContract.methods.aggregate(calls).send({ from: this.userAddress });
+      console.log(tx);
+
+
+      // EXITING HERE TO AVOID USING META-TX FOR NOW
+      return;
+
       const contract = this.walletContract;
-      // const functionData = contract.methods.aggregate(calls).encodeABI();
-      const functionData = this.wallet.interface.encodeFunctionData('aggregate', [calls]);
+      const functionData = contract.methods.aggregate(calls).encodeABI(); // does not work
+      // const functionData = this.wallet.interface.encodeFunctionData('aggregate', calls);
       const message = await this.getMessage(this.wallet, functionData);
 
       const domainData = {
@@ -512,6 +515,7 @@ export default {
         verifyingContract: this.walletAddress,
       };
       const dataToSign = this.getDataToSign(domainData, message);
+      console.log(3);
       await this.sendMetaTransaction(contract, dataToSign);
     },
   },
