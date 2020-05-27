@@ -59,17 +59,18 @@ export default {
       const message = await this.getMessage(contract, functionData);
 
       // Configure EIP712 data blob
+      const to = this.addresses.compreWalletFactory;
       const domainData = {
         name: 'CompreWalletFactory',
         chainId: 42, // Kovan
         version: '1',
-        verifyingContract: this.addresses.compreWalletFactory,
+        verifyingContract: to,
       };
       const dataToSign = this.getDataToSign(domainData, message);
 
       // Get user's signature and send tx
-      const apiId = '5ece63aaf4c7383464b7c57e';
-      await this.sendMetaTransaction(apiId, dataToSign);
+      const apiId = '5ece788af4c7383464b7c588';
+      await this.sendMetaTransaction(to, apiId, dataToSign);
     },
   },
 

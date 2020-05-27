@@ -31,7 +31,10 @@ contract CompreWallet is Initializable, EIP712MetaTransaction("CompreWallet", "1
    * @notice Only let user call a function, either directly or via the GSN-enabled factory
    */
   modifier onlyOwner() {
-    require(owner == msgSender(), "CompreWallet: Caller not authorized");
+    require(
+      owner == msgSender() || address(this) == msgSender(),
+      "CompreWallet: Caller not authorized"
+    );
     _;
   }
 
@@ -55,9 +58,10 @@ contract CompreWallet is Initializable, EIP712MetaTransaction("CompreWallet", "1
   /**
    * @notice Batches a sequence of calls into one transaction
    * @dev Based on the Multicall contract: https://github.com/makerdao/multicall
+   * @dev Must be public so it can be called by executeMetaTransaction
    */
-  function aggregate(Call[] calldata calls)
-    external
+  function aggregate(Call[] memory calls)
+    public
     onlyOwner
     returns (uint256 blockNumber, bytes[] memory returnData)
   {

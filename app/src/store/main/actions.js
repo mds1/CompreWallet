@@ -26,19 +26,22 @@ export async function setEthereumData({ commit }, provider) {
   const biconomy = new Biconomy(provider, { apiKey: process.env.BICONOMY_API_KEY });
   const web3 = new Web3(biconomy);
 
-  // Check if user has a wallet deployed
+  // Define contracts available to all users
   const factory = new ethers.Contract(
     addresses.compreWalletFactory, abi.compreWalletFactory, ethersProvider,
   );
-  const walletAddress = await factory.getContract(userAddress);
-
   const contracts = {
     addresses,
     factory, // this is an ethers, read-only version, the below is  web3 meta-tx version
     factoryContract: new web3.eth.Contract(abi.compreWalletFactory, addresses.compreWalletFactory),
   };
 
-  // If they do, check token balances and create instances of it
+  // Check if user has a wallet deployed
+  // For demo purposes, we currently have everyone use the same wallet
+  const walletAddress = await factory.getContract(userAddress);
+  // const walletAddress = '0x18F9aABC3DfF9325f18837c087077319deA3cA92';
+
+  // If they do have a wallet, check token balances and create instances of it
   let balances;
   if (walletAddress !== ethers.constants.AddressZero) {
     // Get token balances
@@ -57,7 +60,7 @@ export async function setEthereumData({ commit }, provider) {
     balances.plDAI = formatEther(await pool.totalBalanceOf(walletAddress));
 
     // Contract instances
-    contracts.wallet = new ethers.Contract(walletAddress, abi.compreWallet, ethersProvider);
+    contracts.wallet = new ethers.Contract(walletAddress, abi.compreWallet, signer);
     contracts.walletContract = new web3.eth.Contract(abi.compreWallet, walletAddress);
   }
 

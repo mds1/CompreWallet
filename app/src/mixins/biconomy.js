@@ -88,7 +88,7 @@ export default {
     /**
      * @notice Prompt user for signature and relay meta-transaction
      */
-    async sendMetaTransaction(apiId, dataToSign) {
+    async sendMetaTransaction(to, apiId, dataToSign) {
       const functionData = JSON.parse(dataToSign).message.functionSignature;
 
       // Get signature
@@ -106,7 +106,7 @@ export default {
           } else if (response && response.result) {
             // Signature obtained, so parse out components
             const { r, s, v } = this.getSignatureParameters(response.result);
-            await this.relayTransaction(apiId, functionData, r, s, v);
+            await this.relayTransaction(to, apiId, functionData, r, s, v);
           }
         },
       );
@@ -115,24 +115,28 @@ export default {
     /**
      * @notice Send transaction request to API for relaying
      */
-    async relayTransaction(apiId, functionData, r, s, v) {
-      const to = this.addresses.compreWalletFactory;
+    async relayTransaction(to, apiId, functionData, r, s, v) {
       const params = [this.userAddress, functionData, r, s, v];
       const from = this.userAddress;
-      const res = await this.$biconomyApi.post('/api/v2/meta-tx/native', {
-        to, apiId, params, from,
-      });
-      console.log('res: ', res);
+      console.log('a');
+      try {
+        const res = await this.$biconomyApi.post('/api/v2/meta-tx/native', {
+          to, apiId, params, from, gasLimit: 8000000,
+        });
+        console.log('res: ', res);
 
-      if (res.status === 200) {
-        this.txHash = res.data.txHash;
-        await this.ethersProvider.waitForTransaction(this.txHash);
-        await this.$store.dispatch('main/setEthereumData', this.provider); // update state
-        this.notifyUser('positive', 'Your transaction was successfully sent!');
-        this.txHash = undefined; // signals to UI that transaction is complete
-        this.isLoading = false;
-      } else {
-        this.showError(res);
+        if (res.status === 200) {
+          this.txHash = res.data.txHash;
+          await this.ethersProvider.waitForTransaction(this.txHash);
+          await this.$store.dispatch('main/setEthereumData', this.provider); // update state
+          this.notifyUser('positive', 'Your transaction was successfully sent!');
+          this.txHash = undefined; // signals to UI that transaction is complete
+          this.isLoading = false;
+        } else {
+          this.showError(res);
+        }
+      } catch (err) {
+        this.showError(err);
       }
     },
   },

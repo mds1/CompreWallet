@@ -23,161 +23,18 @@
 
     <!-- IF USER HAS NO WALLET -->
     <div
-      v-else-if="true || walletAddress === addressZero"
+      v-else-if="walletAddress === addressZero"
       class="text-center"
     >
       <dashboard-deploy-wallet />
     </div>
 
     <!-- IF USER DOES HAVE WALLET -->
-    <div v-else>
+    <div
+      v-else
+      class="text-center"
+    >
       <dashboard-send-transactions />
-      <h5 class="secondary text-bold text-center">Balances</h5>
-      <div class="row justify-evenly">
-        <div
-          v-for="(token, index) in balances"
-          :key="token.index"
-        >
-          {{formatNumber(token)}} {{index}}
-        </div>
-      </div>
-
-      <div class="q-mt-xl q-pt-lg">
-        <h5 class="secondary text-bold text-center no-margin">Transactions</h5>
-        <div class="text-caption text-italic text-center q-mb-xl">
-          Note: Currently there is a limitation that all numbers have 18 decimals
-        </div>
-
-        <div class="row justify-evenly">
-          <!-- Contract selection -->
-          <div class="col q-mx-xs">
-            <div class="q-my-sm">
-              Target Contract
-            </div>
-            <div
-              v-for="(contract, index) in selectedContracts"
-              :key="index"
-              class="q-my-md"
-            >
-              <q-select
-                dark
-                filled
-                v-model="selectedContracts[index]"
-                :options="contractOptions"
-                label="Select contract"
-              />
-            </div>
-          </div>
-          <!-- Method selection -->
-          <div class="col q-mx-xs">
-            <div class="q-my-sm">
-              Method
-            </div>
-            <div
-              v-for="(contract, index) in selectedContracts"
-              :key="index"
-              class="q-my-md"
-            >
-              <q-select
-                v-if="!selectedContracts[index]"
-                v-model="selectedMethods[index]"
-                disable
-                dark
-                filled
-                :options="[]"
-                label="Select method"
-              />
-              <q-select
-                v-else
-                v-model="selectedMethods[index]"
-                dark
-                filled
-                :options="selectedContracts[index].abi.filter(method => method.type === 'function')"
-                option-label="name"
-                label="Select method"
-              />
-            </div>
-          </div>
-          <!-- Enter inputs -->
-          <div class="col q-mx-xs">
-            <div class="q-my-sm">
-              Inputs, comma-separated
-            </div>
-            <div
-              v-for="(contract, index) in selectedContracts"
-              :key="index"
-              class="q-my-md"
-            >
-              <base-input
-                v-model="selectedInputs[index]"
-                label="Enter Inputs"
-                type="text"
-              />
-            </div>
-          </div>
-          <!-- Enter ETH value to send -->
-          <div class="col q-mx-xs">
-            <div class="q-my-sm">
-              ETH Value to Send
-            </div>
-            <div
-              v-for="(contract, index) in selectedContracts"
-              :key="index"
-              class="q-my-md"
-            >
-              <base-input
-                v-model.number="selectedValues[index]"
-                label="Enter ETH Amount"
-                type="number"
-              />
-            </div>
-          </div>
-          <!-- Revert choice -->
-          <div class="col q-mx-xs">
-            <div class="q-my-sm">
-              Revert on Failure?
-            </div>
-            <div
-              v-for="(contract, index) in selectedContracts"
-              :key="index"
-              class="q-my-md"
-            >
-              <q-select
-                v-model="selectedReverts[index]"
-                dark
-                filled
-                :options="revertOptions"
-                label="Select option"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Button to add new row -->
-        <div
-          class="q-ml-xs cursor-pointer"
-          @click="addTransaction"
-        >
-          <q-icon
-            color="secondary"
-            left
-            name="fas fa-plus-circle"
-          />
-          <span class="secondary text-uppercase">
-            Add Transaction
-          </span>
-        </div>
-
-        <!-- Send batched transactions -->
-        <div class="text-center">
-          <base-button
-            @click="sendAllTransactions"
-            class="q-my-xl"
-            label="Send Transactions"
-          />
-        </div>
-      </div>
-
     </div>
 
     <!-- IF A TRANSACTION IS PROCESSING -->

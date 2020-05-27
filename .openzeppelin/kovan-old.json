@@ -4,16 +4,16 @@
   "proxies": {
     "comprewallet/CompreWalletFactory": [
       {
-        "address": "0x8C16c55A73db624bE04e730A28696850722284fD",
+        "address": "0x0f13ee9b98A0B5E9F9Bd7b6747c890996E8eA5EB",
         "kind": "NonProxy",
-        "bytecodeHash": "4fe9e739b1800d488567b15d087064752281692fe7892d3c8a6d713b25c7a0e8"
+        "bytecodeHash": "be6127ff1731c0cdd3f51d91ddbf23025fcd0d3762c3259b6d7159e01ea1c8d7"
       }
     ],
     "comprewallet/CompreWallet": [
       {
-        "address": "0xb31A5a099A0158d920C4039D39d6F6096d7546d3",
+        "address": "0x61A8E2Bfdaf3568D466aA0138dcE7B244D942B73",
         "kind": "NonProxy",
-        "bytecodeHash": "f5ada094869b371b279833c5d9584f7aa21dd0f72b68a32332601f1fdd37084d"
+        "bytecodeHash": "53ff80fa10083382c3d43abb43b6587b3c6bf2fe9fe50d5afea50b947fa1dd8d"
       }
     ]
   },
