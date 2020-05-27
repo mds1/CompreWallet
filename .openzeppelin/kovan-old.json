@@ -1,0 +1,21 @@
+{
+  "contracts": {},
+  "solidityLibs": {},
+  "proxies": {
+    "comprewallet/CompreWalletFactory": [
+      {
+        "address": "0x8C16c55A73db624bE04e730A28696850722284fD",
+        "kind": "NonProxy",
+        "bytecodeHash": "4fe9e739b1800d488567b15d087064752281692fe7892d3c8a6d713b25c7a0e8"
+      }
+    ],
+    "comprewallet/CompreWallet": [
+      {
+        "address": "0xb31A5a099A0158d920C4039D39d6F6096d7546d3",
+        "kind": "NonProxy",
+        "bytecodeHash": "f5ada094869b371b279833c5d9584f7aa21dd0f72b68a32332601f1fdd37084d"
+      }
+    ]
+  },
+  "manifestVersion": "2.2"
+}

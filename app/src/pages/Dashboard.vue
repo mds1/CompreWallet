@@ -23,18 +23,15 @@
 
     <!-- IF USER HAS NO WALLET -->
     <div
-      v-else-if="walletAddress === addressZero"
+      v-else-if="true || walletAddress === addressZero"
       class="text-center"
     >
-      It looks like this is your first visit. Deploy your contract wallet to get started!
-      <base-button
-        label="Deploy Wallet"
-        @click="deployWallet"
-      />
+      <dashboard-deploy-wallet />
     </div>
 
     <!-- IF USER DOES HAVE WALLET -->
     <div v-else>
+      <dashboard-send-transactions />
       <h5 class="secondary text-bold text-center">Balances</h5>
       <div class="row justify-evenly">
         <div
@@ -211,6 +208,8 @@
 import { mapState } from 'vuex';
 import { ethers } from 'ethers';
 import ConnectWallet from 'components/ConnectWallet';
+import DashboardDeployWallet from 'components/DashboardDeployWallet';
+import DashboardSendTransactions from 'components/DashboardSendTransactions';
 import helpers from 'src/mixins/helpers';
 
 const addresses = require('../../../addresses.json');
@@ -300,6 +299,8 @@ export default {
 
   components: {
     ConnectWallet,
+    DashboardDeployWallet,
+    DashboardSendTransactions,
   },
 
   methods: {
@@ -360,29 +361,6 @@ export default {
         },
       );
     },
-
-
-    /**
-     * @notice Deploy user's wallet on first visit
-     */
-    async deployWallet() {
-      this.isLoading = true;
-      const contract = this.factoryContract;
-      const logicAddress = this.addresses.compreWallet;
-      const functionData = contract.methods.createContract(logicAddress).encodeABI();
-      const message = await this.getMessage(this.factory, functionData);
-
-      const domainData = {
-        name: 'CompreWalletFactory',
-        chainId: 42, // Kovan
-        version: '1',
-        verifyingContract: this.addresses.compreWalletFactory,
-      };
-      const dataToSign = this.getDataToSign(domainData, message);
-
-      await this.sendMetaTransaction(contract, dataToSign);
-    },
-
 
     async sendTransaction(contract, userAddress, functionData, r, s, v) {
       const { web3 } = this;
