@@ -32,33 +32,16 @@ describe('CompreWalletFactory', () => {
   });
 
   // Main functionality ============================================================================
-  it.skip('properly deploys and configures proxy contracts', async () => {
-    /**
-     * @dev Initialization of the deployed proxy contract fails when testing with the ganache-cli
-     * `--fork` feature. See the linked issue for details:
-     *     https://github.com/trufflesuite/ganache-core/issues/526
-     * Note that this test does pass in production even though it fails here.
-     */
-
-    // Deploy contract directly instead of using GSN
-    const receipt = await compreWalletFactory.createContract(compreWalletLogic.address, { from: user });
+  it('properly deploys and configures proxy contracts', async () => {
+    // Deploy contract
+    const receipt = await compreWalletFactory.createContract({ from: user });
 
     // Get instance of the newly deployed proxy
-    const proxyAddress = await compreWalletFactory.getContract(user);
-    const proxy = await CompreWallet.at(proxyAddress);
-    expectEvent(receipt, 'ProxyCreated', {
-      proxy: proxyAddress,
+    const walletAddress = await compreWalletFactory.getContract(user);
+    const wallet = await CompreWallet.at(walletAddress);
+    expectEvent(receipt, 'WalletCreated', {
+      wallet: walletAddress,
     });
-    expect(await proxy.owner()).to.be.equal(user);
-  });
-
-  it.skip('enables users to interact with their proxy via the factory', async () => {
-    /**
-     * @dev This test is incomplete as it fails due to the same error as above. Similarly,
-     * this test does pass in production
-     */
-
-    // Deploy contract directly instead of using GSN
-    const receipt = await compreWalletFactory.createContract(compreWalletLogic.address, { from: user });
+    expect(await wallet.owner()).to.be.equal(user);
   });
 });

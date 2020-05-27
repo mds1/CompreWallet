@@ -99,7 +99,26 @@ describe('CompreWallet', () => {
   });
 
   it('only lets the owner send batched calls', async () => {
-    //
+    // Send Dai to the user's wallet
+    const walletAddress = compreWallet.address;
+    const depositAmount = parseEther('100');
+    await dai.transfer(walletAddress, depositAmount);
+    expect((await dai.balanceOf(walletAddress)).toString()).to.equal(depositAmount.toString());
+
+    // Generate ethers.js instance of the contract (since this is what we use on the frontend)
+    const compreWalletE = new ethers.Contract(
+      walletAddress,
+      compreWallet.abi,
+      ethersProvider.getSigner(user2), // this user is not the owner
+    );
+
+    // Send multiple state-changing calls
+    const transferAmount = parseEther('10');
+    const calls = [
+      // Transfer Dai to someone
+      [addresses.dai, dai.interface.encodeFunctionData('transfer', [user2, transferAmount]), '0', true],
+    ];
+    await expectRevert(compreWalletE.aggregate(calls), 'CompreWallet: Caller not authorized');
   });
 
   it('reverts on a failed call', async () => {
@@ -109,7 +128,7 @@ describe('CompreWallet', () => {
     await dai.transfer(walletAddress, depositAmount);
     expect((await dai.balanceOf(walletAddress)).toString()).to.equal(depositAmount.toString());
 
-    // Generate ethers.js instance of the contract (since this is what we use on the frontend)
+    // Generate ethers.js instance of the contract
     const compreWalletE = new ethers.Contract(
       walletAddress,
       compreWallet.abi,

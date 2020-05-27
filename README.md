@@ -4,7 +4,8 @@ The comprehensive Ethereum smart contract wallet that can do anything.
 
 ## Overview
 
-- Video demo (coming soon)
+- [Video demo](https://youtu.be/2e64UvbU3rc)
+  - Towards the end video recording was cut off for some reason, so [here](https://kovan.etherscan.io/tx/0x1ebf9a522b04c89734dcc5e564f37be96d031bd1b13a055b3b597d0d82bdcc0f) is the last transaction shown in the video. You can see cDAI was minted, and we entered PoolTogether (plDAI is minted weekly, which is why it's not visible in Etherscan)
 
 This tool provides you with a smart contract wallet that supports the following:
 
