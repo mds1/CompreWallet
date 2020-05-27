@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import Web3 from 'web3';
 import Biconomy from '@biconomy/mexa';
-import { getEtherBalances, getTokensBalance } from '@mycrypto/eth-scan';
+import { getTokensBalance } from '@mycrypto/eth-scan';
 
 const { formatEther, formatUnits } = ethers.utils;
 
@@ -32,16 +32,21 @@ export async function setEthereumData({ commit }, provider) {
   );
   const walletAddress = await factory.getContract(userAddress);
 
-  // If they do, check token balances
+  const contracts = {
+    addresses,
+    factory, // this is an ethers, read-only version, the below is  web3 meta-tx version
+    factoryContract: new web3.eth.Contract(abi.compreWalletFactory, addresses.compreWalletFactory),
+  };
+
+  // If they do, check token balances and create instances of it
   let balances;
   if (walletAddress !== ethers.constants.AddressZero) {
+    // Get token balances
     const balancesByAddress = await getTokensBalance(ethersProvider, userAddress, [
       addresses.dai,
       addresses.cdai,
     ]);
-    const ethBalance = await getEtherBalances(ethersProvider, [userAddress]);
     balances = {
-      ETH: formatEther(ethBalance[userAddress]),
       DAI: formatEther(balancesByAddress[addresses.dai]),
       cDAI: formatUnits(balancesByAddress[addresses.cdai], 8),
     };
@@ -50,13 +55,11 @@ export async function setEthereumData({ commit }, provider) {
     const poolAbi = ['function totalBalanceOf(address _addr) external view returns (uint256) '];
     const pool = new ethers.Contract(addresses.pool, poolAbi, ethersProvider);
     balances.plDAI = formatEther(await pool.totalBalanceOf(userAddress));
-  }
 
-  const contracts = {
-    addresses,
-    factory, // this is an ethers, read-only version, the below is  web3 meta-tx version
-    factoryContract: new web3.eth.Contract(abi.compreWalletFactory, addresses.compreWalletFactory),
-  };
+    // Contract instances
+    contracts.wallet = new ethers.Contract(walletAddress, abi.compreWallet, ethersProvider);
+    contracts.walletContract = new web3.eth.Contract(abi.compreWallet, walletAddress);
+  }
 
   commit('setWallet', {
     signer,

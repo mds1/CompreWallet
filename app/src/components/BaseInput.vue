@@ -5,6 +5,7 @@
       class="q-my-sm"
       dark
       filled
+      hide-bottom-space
       :label="label"
       lazy-rules
       :rules="[val => rules(val)]"

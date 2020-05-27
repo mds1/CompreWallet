@@ -13,5 +13,7 @@ export function setWallet(state, wallet) {
 
   state.contracts.factory = wallet.contracts.factory;
   state.contracts.factoryContract = wallet.contracts.factoryContract;
+  state.contracts.wallet = wallet.contracts.wallet;
+  state.contracts.walletContract = wallet.contracts.walletContract;
   state.contracts.addresses = wallet.contracts.addresses;
 }
