@@ -6,6 +6,8 @@
 import { mapState } from 'vuex';
 import helpers from 'src/mixins/helpers';
 
+const ethSigUtil = require('eth-sig-util');
+
 
 export default {
   mixins: [helpers],
@@ -45,7 +47,6 @@ export default {
      */
     async getMessage(web3Contract, functionData) {
       const nonce = parseInt(await web3Contract.methods.getNonce(this.userAddress).call(), 10);
-      console.log('nonce: ', nonce);
       return {
         nonce,
         from: this.userAddress,
@@ -106,6 +107,11 @@ export default {
           } else if (response && response.result) {
             // Signature obtained, so parse out components
             const { r, s, v } = this.getSignatureParameters(response.result);
+            const recovered = ethSigUtil.recoverTypedSignature_v4({
+              data: JSON.parse(dataToSign),
+              sig: response.result,
+            });
+            console.log(`Recovered ${recovered}`);
             await this.relayTransaction(to, apiId, functionData, r, s, v);
           }
         },
@@ -118,12 +124,10 @@ export default {
     async relayTransaction(to, apiId, functionData, r, s, v) {
       const params = [this.userAddress, functionData, r, s, v];
       const from = this.userAddress;
-      console.log('a');
       try {
         const res = await this.$biconomyApi.post('/api/v2/meta-tx/native', {
           to, apiId, params, from, gasLimit: 8000000,
         });
-        console.log('res: ', res);
 
         if (res.status === 200) {
           this.txHash = res.data.txHash;

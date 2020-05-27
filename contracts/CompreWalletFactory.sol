@@ -24,21 +24,18 @@ contract CompreWalletFactory is EIP712MetaTransaction("CompreWalletFactory", "1"
 
   /**
    * @notice Called to deploy a clone of _target for _user
-   * @param _target address of the underlying logic contract to delegate to
    */
-  function createContract(address _target) external {
+  function createContract() external {
     // Contract user is the user who sent the meta-transaction
     address _user = msgSender();
 
-    // Define function call to initialize the new ProvideLiquidity contract
-    bytes memory _payload = abi.encodeWithSignature("initializeWallet(address)", _user);
-
     // Deploy proxy
-    address _contract = deployMinimal(_target, _payload);
+    CompreWallet _compreWallet = new CompreWallet();
+    _compreWallet.initializeWallet(_user);
 
     // Update state
     users.push(_user);
-    getContract[_user] = _contract;
+    getContract[_user] = address(_compreWallet);
   }
 
   /**

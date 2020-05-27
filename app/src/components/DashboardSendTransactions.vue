@@ -221,24 +221,40 @@ export default {
       const contract = this.walletContract;
 
       // Configure array of calls
-      const { address, abi } = this.contractOptions[0];
-      const methodName = 'approve';
-      const parsedInputs = ['0xC3a62C8Af55c59642071bC171Ebd05Eb2479B663', '1'];
-      const dai = new ethers.Contract(address, abi, this.signer);
-      const encoded = dai.interface.encodeFunctionData(methodName, [...parsedInputs]);
-      const calls = [{
-        target: address,
-        callData: encoded,
-        value: '0',
-        shouldRevert: true,
-      }];
+      const calls = [];
+      for (let i = 0; i < this.selectedContracts.length; i += 1) {
+        // Get address and ABI of selected contract
+        const { address, abi } = this.selectedContracts[i];
+
+        // Parse out some parameters
+        const shouldRevert = this.selectedReverts[i].value;
+
+        // Format function input data
+        const inputs = this.selectedInputs[i].split(',');
+        const parsedInputs = inputs.map((input) => {
+          const trimmed = input.trim();
+          // If hex string, leave value alone
+          if (trimmed.startsWith('0x')) return trimmed;
+          // If number, scale number
+          if (!Number.isNaN(Number(trimmed))) return ethers.utils.parseEther(trimmed).toString();
+          return trimmed;
+        });
+
+        // Generate encoded data
+        const selectedContract = new this.web3.eth.Contract(abi, address);
+        const method = this.selectedMethods[i].name;
+        const encodedData = selectedContract.methods[method](...parsedInputs).encodeABI();
+
+        // Add call to list of calls
+        calls.push({
+          target: address, callData: encodedData, value: '0', shouldRevert,
+        });
+      }
 
       // Get encoded function data
-      console.log(1);
       const functionData = this.wallet.interface.encodeFunctionData('aggregate', [calls]);
 
       // Define message user needs to sign
-      console.log(2);
       const message = await this.getMessage(contract, functionData);
 
       // Configure EIP712 data blob
@@ -252,12 +268,13 @@ export default {
       const dataToSign = this.getDataToSign(domainData, message);
 
       // Get user's signature and send tx
-      const apiId = '5ece8a60f4c7383464b7c599';
+      const apiId = '5eceee77f4c7383464b7c5ab';
       await this.sendMetaTransaction(to, apiId, dataToSign);
 
       // const overrides = { gasLimit: 2000000 };
       // const tx = await this.wallet.aggregate(calls, overrides); // this works
       // await tx.wait();
+      // console.log('done');
     },
 
     formatNumber(number, decimals = 2) {

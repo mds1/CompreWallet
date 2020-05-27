@@ -52,8 +52,7 @@ export default {
       const contract = this.factoryContract;
 
       // Get encoded function data
-      const logicAddress = this.addresses.compreWallet;
-      const functionData = contract.methods.createContract(logicAddress).encodeABI();
+      const functionData = contract.methods.createContract().encodeABI();
 
       // Define message user needs to sign
       const message = await this.getMessage(contract, functionData);
@@ -69,7 +68,7 @@ export default {
       const dataToSign = this.getDataToSign(domainData, message);
 
       // Get user's signature and send tx
-      const apiId = '5ece788af4c7383464b7c588';
+      const apiId = '5ecede8799abbb7b87efed30';
       await this.sendMetaTransaction(to, apiId, dataToSign);
     },
   },
